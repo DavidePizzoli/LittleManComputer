@@ -1,12 +1,47 @@
+;; 28/11 inizio scrittura funzioni più semplici
+
+;; controlla che la memoria sia 100 celle
 (defun mem_is_in_range (x)
-  (if (< x 100) 1
-    0))
+  (if (<= x 100) T
+    nil))
 
-(defun pc_is_in_range (x)
-  (if (< x 1000) 1
-    0))
+;; controlla che x sia compreso tra 0 e 999
+(defun mod_1000 (x)
+  (if (< x 1000) T
+    nil))
 
+;; incrementa pc di 1. Se è 999 allora il prox numero è 0
 (defun sum_pc (x)
-  (if (= 0 (pc_is_in_range (+ 1 x)))
+  (if (null (mod_1000 (+ 1 x))) 
     0
     (+ 1 x)))
+
+;; controlla che gli elementi della coda siano tutti compresi tra 0 e 999
+(defun is_correct_coda_input (l)
+  (cond ((null l) T)
+        ((null (mod_1000 (first l))) nil)
+        (T (input (rest l)))))
+
+(defun set_flag_0 () 0)
+(defun set_flag_1 () 1)
+(defun set_acc_0 () 0)
+
+(defun is_flag_1 (x)
+  (if (= 1 x) T
+    nil))
+
+(defun is_flag_0 (x)
+  (if (= 0 x) T
+    nil))
+
+;;definizione di state e halted-state
+(defstruct state ACC PC MEM IN OUT FLAG)
+(defstruct halted-state ACC PC MEM IN OUT FLAG)
+
+(defun new_state (acc PC Mem In Out Flag)
+  (make-state :ACC acc :PC pc :MEM Mem :IN In :OUT Out :FLAG Flag))
+
+(defun new_halted_state (acc PC Mem In Out Flag)
+  (make-halted-state :ACC acc :PC pc :MEM Mem :IN In :OUT Out :FLAG Flag))
+
+(defun prova (STATE :acc a :pc b :mem c :in d :out)

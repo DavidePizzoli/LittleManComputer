@@ -12,7 +12,7 @@
 
 ;; incrementa pc di 1. Se è 999 allora il prox numero è 0
 (defun sum_pc (x)
-  (if (null (mod_1000 (+ 1 x)))
+  (if (null (mod_1000 (+ 1 x))) 
     0
     (+ 1 x)))
 
@@ -26,3 +26,20 @@
 (defun set_flag_1 () 1)
 (defun set_acc_0 () 0)
 
+(defun is_flag_1 (x)
+  (if (= 1 x) T
+    nil))
+
+(defun is_flag_0 (x)
+  (if (= 0 x) T
+    nil))
+
+;;definizione di state e halted-state
+(defstruct state ACC PC MEM IN OUT FLAG)
+(defstruct halted-state ACC PC MEM IN OUT FLAG)
+
+(defun new_state (acc PC Mem In Out Flag)
+  (make-state :ACC acc :PC pc :MEM Mem :IN In :OUT Out :FLAG Flag))
+
+(defun new_halted_state (acc PC Mem In Out Flag)
+  (make-halted-state :ACC acc :PC pc :MEM Mem :IN In :OUT Out :FLAG Flag))
