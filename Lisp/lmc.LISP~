@@ -1,0 +1,12 @@
+(defun mem_is_in_range (x)
+  (if (< x 100) 1
+    0))
+
+(defun pc_is_in_range (x)
+  (if (< x 1000) 1
+    0))
+
+(defun sum_pc (x)
+  (if (= 0 (pc_is_in_range (+ 1 x)))
+    0
+    (+ 1 x)))
