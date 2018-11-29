@@ -27,16 +27,17 @@
         ((null (mod-1000 (first l))) nil)
         (T (is-lista-1000 (rest l)))))
 
-(defun set-flag-0 () 0)
-(defun set-flag-1 () 1)
+(defun set-flag-0 () "noflag")
+(defun set-flag-1 () "flag")
 (defun set-acc-0 () 0)
 
+
 (defun is-flag-1 (x)
-  (if (= 1 x) T
+  (if (string= "flag" x) T
     nil))
 
 (defun is-flag-0 (x)
-  (if (= 0 x) T
+  (if (string= "noflag" x) T
     nil))
 
 ;; definizione di state e halted-state
@@ -59,14 +60,26 @@
   (setq flag (state-FLAG s))
   (and (mod-1000 pc)
        (listp mem)
-       (is-lista-1000 mem))
-  (scorri-mem acc pc mem in out flag))
+       (is-lista-1000 mem)
+       (scorri-mem acc pc mem in out flag)))
 
 ;; scorro la memoria
 (defun scorri-mem (acc pc mem in out flag) 
   (setq ist (nth pc mem))
   (print ist)
-  
+  (if (null ist) (error "Istruzione non valida") 
+      (cond ((and (>= ist 100) (< ist 200)) (add-op acc ist pc mem in out flag))
+            ((and (>= ist 200) (< ist 300)) (sub-op acc ist pc mem in out flag))
+            ((and (>= ist 300) (< ist 400)) (store-op acc ist pc mem in out flag))
+            ((and (>= ist 500) (< ist 600)) (load-op acc ist pc mem in out flag))
+            ((and (>= ist 600) (< ist 700)) (branch-op acc ist pc mem in out flag))
+            ((and (>= ist 700) (< ist 800)) (branch-zero-op acc ist pc mem in out flag))
+            ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem in out flag))
+            ((= ist 901) (input-op acc ist pc mem in out flag))
+            ((= ist 902) (output-op acc ist pc mem in out flag))
+            ((and (>= ist 0) (< ist 100)) (halt-op acc ist pc mem in out flag))
+    )
+  )
   )  
 
 ;; somma (1xx)
@@ -74,16 +87,16 @@
   (setq cell (mod ist 100))
   (setq a (nth cell mem))
   (cond ((null a) nil)
-        ((null (mod-1000 (+ a acc))) (new-state (+ a acc) (sum-pc pc) mem in out 1))
-        (T (new-state (+ a acc) (sum-pc pc) mem in out 0))))
+        ((null (mod-1000 (+ a acc))) (new-state (+ a acc) (sum-pc pc) mem in out (set-flag-1 )))
+        (T (new-state (+ a acc) (sum-pc pc) mem in out (set-flag-0 )))))
 
 ;; sottazione (2xx)
 (defun sub-op (acc ist pc mem in out flag) 
   (setq cell (mod ist 100))
   (setq a (nth cell mem))
   (cond ((null a) nil)
-        ((null (mod-1000 (- acc a))) (new-state (- acc a) (sum-pc pc) mem in out 1))
-        (T (new-state (- acc a) (sum-pc pc) mem in out 0))))
+        ((null (mod-1000 (- acc a))) (new-state (- acc a) (sum-pc pc) mem in out (set-flag-1 )))
+        (T (new-state (- acc a) (sum-pc pc) mem in out (set-flag-0 )))))
 
 ;; store (3xx)
 (defun store-op (acc ist pc mem in out flag)
@@ -130,7 +143,11 @@
 ;; halt (0xx)
 (defun halt-op (acc ist pc mem in out flag)
   (new-halted-state acc pc mem in out flag))
-     
+
+
+
+
+
 
 
 
