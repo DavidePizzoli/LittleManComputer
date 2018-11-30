@@ -33,17 +33,7 @@
         ((null (mod-1000 (first l))) nil)
         (T (is-lista-1000 (rest l)))))
 
-(defun set-acc-0 () 0)
-
-
-(defun is-flag (x)
-  (if (null (stringp x)) nil
-   (string= "flag" x )))
-
-(defun is-no-flag (x)
-  (if (null (stringp x)) nil
-   (string= "noflag" x )))
-
+;; definizione di flag e noflag
 (defparameter flag (quote flag))
 (defparameter noflag (quote noflag))
 
@@ -57,7 +47,9 @@
            (listp mem)
            (listp in)
            (listp out)
-           (is-lista-1000 mem))
+           (is-lista-1000 mem)
+           (is-lista-1000 in)
+           (is-lista-1000 out))
   (make-state :ACC acc :PC pc :MEM mem :IN in :OUT out :FLAG f)))
 
 (defun new-halted-state (acc pc mem in out f)
@@ -66,7 +58,9 @@
            (listp mem)
            (listp in)
            (listp out)
-           (is-lista-1000 mem))
+           (is-lista-1000 mem)
+           (is-lista-1000 in)
+           (is-lista-1000 out))
   (make-halted-state :ACC acc :PC pc :MEM mem :IN in :OUT out :FLAG f)))
 
 ;; controllo se non ci sono errori
@@ -92,12 +86,9 @@
             ((and (>= ist 600) (< ist 700)) (branch-op acc ist pc mem in out f))
             ((and (>= ist 700) (< ist 800)) (branch-zero-op acc ist pc mem in out f))
             ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem in out f))
-            ((= ist 901) (input-op acc ist pc mem in out f))
-            ((= ist 902) (output-op acc ist pc mem in out f))
-            ((and (>= ist 0) (< ist 100)) (halt-op acc ist pc mem in out f))
-    )
-  )
-  )  
+            ((= ist 901) (input-op acc pc mem in out f))
+            ((= ist 902) (output-op acc pc mem in out f))
+            ((and (>= ist 0) (< ist 100)) (halt-op acc pc mem in out f)))))  
 
 ;; somma (1xx)
 (defun add-op (acc ist pc mem in out) 
@@ -147,38 +138,40 @@
     nil))
     
 ;; input (901)
-(defun input-op (acc ist pc mem in out f)
-  (setf a (first in))
-  (cond ((null a) nil)
-        (T (new-state a (sum-pc pc) mem (rest in) out f))))
+(defun input-op (acc pc mem in out f)
+  (setf primo (first in))
+  (cond ((null primo) nil)
+        (T (new-state primo (sum-pc pc) mem (rest in) out f))))
 
 ;; output (902)
-(defun output-op (acc ist pc mem in out f)
-  (setf l (nreverse out))
-  (new-state acc (sum-pc pc) mem in (nreverse (push acc l)) f))
+(defun output-op (acc pc mem in out f)
+  (cond ((null out) (push acc out))
+        (T (push acc (cdr (last out)))))
+  (new-state acc (sum-pc pc) mem in out f))
 
 ;; halt (0xx)
-(defun halt-op (acc ist pc mem in out f)
+(defun halt-op (acc pc mem in out f)
   (new-halted-state acc pc mem in out f))
 
-
-;; 29/10 inizio execution-loop
 
 (defun execution-loop (s)
   (cond ((null (state-p s)) nil)
         (T (exe-out s (state-MEM s)))))
 
+;; controlla se è halted-state o è arrivata alla fine della memoria
 (defun exe-out (s l)
   (setf newstate (one-istruction s))
   (cond ((halted-state-p newstate) (halted-state-OUT newstate))
         ((null (cdr l)) nil)
         (T (exe-out newstate (cdr l)))))
   
+;; aggiunge alla memoria 0 fino ad arrivare a 100 elementi
 (defun aggiungi-zeri (l)
   (if (< (length l) 100)
       (and (setf app (make-list (- 100 (length l)) :initial-element 0)) (append l app))
     nil))
       
+
 
 
 ;;;; end of file -- lmc.lisp 
