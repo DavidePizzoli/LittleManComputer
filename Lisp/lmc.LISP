@@ -38,8 +38,8 @@
 (defparameter noflag (quote noflag))
 
 ;; definizione di state e halted-state
-(defstruct (state (:type list) :named) ACC PC MEM IN OUT FLAG)
-(defstruct (halted-state (:type list) :named) ACC PC MEM IN OUT FLAG)
+(defstruct (state (:type list) :named) A ACC P PC M MEM I IN O OUT F FLAG)
+(defstruct (halted-state (:type list) :named)  A ACC P PC M MEM I IN O OUT F FLAG)
 
 (defun new-state (acc pc mem in out f)
   (if (and (mod-100 pc)
@@ -50,7 +50,7 @@
            (is-lista-1000 mem)
            (is-lista-1000 in)
            (is-lista-1000 out))
-  (make-state :ACC acc :PC pc :MEM mem :IN in :OUT out :FLAG f)))
+  (make-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem :I :IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
 
 (defun new-halted-state (acc pc mem in out f)
   (if (and (mod-100 pc)
@@ -61,10 +61,10 @@
            (is-lista-1000 mem)
            (is-lista-1000 in)
            (is-lista-1000 out))
-  (make-halted-state :ACC acc :PC pc :MEM mem :IN in :OUT out :FLAG f)))
+  (make-halted-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem :I :IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
 
 ;; controllo se non ci sono errori
-(defun one-istruction (s) 
+(defun one-instruction (s) 
   (cond ((null (state-p s)) nil)
         (T (setf acc (state-ACC s))
            (setf pc (state-PC s))
@@ -160,7 +160,7 @@
 
 ;; controlla se è halted-state o è arrivata alla fine della memoria
 (defun exe-out (s l)
-  (setf newstate (one-istruction s))
+  (setf newstate (one-instruction s))
   (cond ((halted-state-p newstate) (halted-state-OUT newstate))
         ((null (cdr l)) nil)
         (T (exe-out newstate (cdr l)))))
