@@ -20,7 +20,7 @@
   (if (and (> x -1) (< x 1000)) T
     nil))
 
-;; incrementa pc di 1. Se è 99 allora il prox numero è 0
+;; incrementa pc di 1. Se Ã¨ 99 allora il prox numero Ã¨ 0
 (defun sum-pc (x)
   (if (null (mod-100 (+ 1 x))) 
     0
@@ -157,7 +157,7 @@
   (cond ((null (state-p s)) nil)
         (T (exe-out s (state-MEM s)))))
 
-;; controlla se è halted-state o è arrivata alla fine della memoria
+;; controlla se Ã¨ halted-state o Ã¨ arrivata alla fine della memoria
 (defun exe-out (s l)
   (setf newstate (one-instruction s))
   (cond ((halted-state-p newstate) (halted-state-OUT newstate))
@@ -176,14 +176,20 @@
   (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)))
+    (setf lista (read-list-from in)))
+ )
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
-    (unless (eq e 'eof) (print e)
+    (unless (eq e 'eof)
       (cons e (read-list-from input-stream)))))
-        
 
+(defun lunghezza-elementi (lista)
+  (cond ((null (cdr lista) T))
+        ((= (length (car lista)))))) 
+
+(defun esempio (lista)
+  (split-sequence:SPLIT-SEQUENCE #\Space lista))
 
 ;; lmc-run produce la coda di output (execution-loop)
 
