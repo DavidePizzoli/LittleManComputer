@@ -1,3 +1,10 @@
-      ciao Davide       
-divertiti     con                   
-Minecraft                 
+           
+LOOP    brz END
+        sub ONE
+        sta SECOND
+        lda RESULT
+        add FIRST
+        sta RESULT
+
+        lda SECOND
+        bra LOOP

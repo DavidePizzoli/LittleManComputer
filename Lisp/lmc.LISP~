@@ -176,13 +176,17 @@
   (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)))
-
+    (setf lista (read-list-from in)))
+  (split-string lista 0))
+  
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
-    (unless (eq e 'eof) (print e)
+    (unless (eq e 'eof) ;;(print e)
       (cons e (read-list-from input-stream)))))
-        
+
+(defun split-string (l cont)
+  (cond ((/= cont (length l)) 
+        (cons (string-trim '(#\Space #\Tab #\Newline) (nth cont l)) (split-string l (+ cont 1))))))
 
 
 ;; lmc-run produce la coda di output (execution-loop)
