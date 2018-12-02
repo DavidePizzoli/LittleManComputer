@@ -172,8 +172,16 @@
       
 
 ;; lmc-load legge il file e produce la memoria iniziale 
-(defun lmc-load (percorso)
-  (with-open-file
+(defun lmc-load (file)
+  (with-open-file (in file
+                      :direction :input
+                      :if-does-not-exist :error)
+    (read-list-from in)))
+
+(defun read-list-from (input-stream)
+  (let ((e (read-line input-stream nil 'eof)))
+    (unless (eq e 'eof) (print e)
+      (cons e (read-list-from input-stream)))))
         
 
 
