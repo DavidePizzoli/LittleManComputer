@@ -170,10 +170,10 @@
 
 ;; lmc-load legge il file e produce la memoria iniziale 
 (defun lmc-load (file)
-  (with-open-file (in file
+  (rimuovi-commenti (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)))
+    (read-list-from in))))
   
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -190,7 +190,16 @@
 (defun is-commento (s)
   (let ((first-slash (position #\/ s)))
     (cond ((null first-slash) nil)
-          ((not (null (position #\/ s :start (+ first-slash 1)))) T))))
+          ((not (null (position #\/ s :start (+ first-slash 1)))) first-slash))))
+
+(defun rimuovi-commenti (l)
+  (cond ((not (null (first l)))
+         (cons (rimuovi-commento-stringa (first l)) (rimuovi-commenti (rest l))))))
+
+(defun rimuovi-commento-stringa (s)
+  (let ((posizione (is-commento s)))
+    (cond ((null posizione) s)
+        (T (subseq s 0 posizione)))))
 
   
 

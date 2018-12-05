@@ -170,10 +170,10 @@
 
 ;; lmc-load legge il file e produce la memoria iniziale 
 (defun lmc-load (file)
-  (with-open-file (in file
+  (split-lista (rimuovi-commenti (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)))
+    (read-list-from in)))))
   
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -201,9 +201,22 @@
     (cond ((null posizione) s)
         (T (subseq s 0 posizione)))))
 
+(defun split-str (string &optional (separator " "))
+  (split-str-1 string separator))
+
+(defun split-str-1 (string &optional (separator " ") (r nil))
+  (let ((n (position separator string
+		     :from-end t
+		     :test #'(lambda (x y)
+			       (find y x :test #'string=)))))
+    (if n
+	(split-str-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r))
+      (cons string r))))
+
   
-
-
+(defun split-lista (l)
+  (cond ((not (null (first l)))
+         (cons (split-str (first l) " ") (split-lista (rest l))))))
 
 ;; lmc-run produce la coda di output (execution-loop)
 
