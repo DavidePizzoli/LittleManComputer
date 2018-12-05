@@ -192,7 +192,8 @@
 (defun contains-commento (s)
   (let ((first-slash (position #\/ s)))
     (cond ((null first-slash) nil)
-          ((not (null (position #\/ s :start (+ first-slash 1)))) first-slash))))
+          ((null (position #\/ s :start (+ first-slash 1))) nil)
+          (T (= (position #\/ s :start (+ first-slash 1)) (+ first-slash 1)) first-slash))))
 
 ;;; rimuove i commenti dalla lista
 (defun rimuovi-commenti (l)
