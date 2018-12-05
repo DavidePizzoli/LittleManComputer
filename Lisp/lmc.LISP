@@ -164,16 +164,16 @@
 ;; aggiunge alla memoria 0 fino ad arrivare a 100 elementi
 (defun aggiungi-zeri (l)
   (if (< (length l) 100)
-      (and (setf app (make-list (- 100 (length l)) :initial-element 0)) (append l app))
+      (let ((app (make-list (- 100 (length l)) :initial-element 0)))
+         (append l app))
     nil))
-      
 
 ;; lmc-load legge il file e produce la memoria iniziale 
 (defun lmc-load (file)
-  (split-string (with-open-file (in file
+  (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)) 0))
+    (read-list-from in)))
   
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -186,6 +186,20 @@
 
 (defun remove-all (stringa)
   (remove #\Space (remove #\Tab (remove #\Newline stringa))))
+
+(defun is-commento (s)
+  (let ((first-slash (position #\/ s)))
+    (cond ((null first-slash) nil)
+          ((not (null (position #\/ s :start (+ first-slash 1)))) first-slash))))
+
+(defun rimuovi-commenti (l)
+  (cond ((not (null (first l)))
+         (cons (rimuovi-commento-stringa (first l)) (rimuovi-commenti (rest l))))))
+
+(defun rimuovi-commento-stringa (s)
+  (let ((posizione (is-commento s)))
+    (cond ((null posizione) s)
+        (T (subseq s 0 posizione)))))
 
   
 

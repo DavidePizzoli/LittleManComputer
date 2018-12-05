@@ -65,45 +65,43 @@
 ;; controllo se non ci sono errori
 (defun one-instruction (s) 
   (cond ((null (state-p s)) nil)
-        (T (setf acc (state-ACC s))
-           (setf pc (state-PC s))
-           (setf mem (state-MEM s))
-           (setf in (state-IN s))
-           (setf out (state-OUT s))
-           (setf f (state-FLAG s))
-           (scorri-mem acc pc mem in out f))))
+        (T (let ((acc (state-ACC s))
+                 (pc (state-PC s))
+                 (mem (state-MEM s))
+                 (in (state-IN s))
+                 (out (state-OUT s))
+                 (f (state-FLAG s)))
+           (scorri-mem acc pc mem in out f)))))
 
 ;; scorro la memoria
 (defun scorri-mem (acc pc mem in out f) 
-  (setf ist (nth pc mem))
+  (let ((ist (nth pc mem)))
   ;;(print ist)
   (if (null ist) nil
-      (cond ((and (>= ist 100) (< ist 200)) (add-op acc ist pc mem in out))
-            ((and (>= ist 200) (< ist 300)) (sub-op acc ist pc mem in out))
-            ((and (>= ist 300) (< ist 400)) (store-op acc ist pc mem in out f))
-            ((and (>= ist 500) (< ist 600)) (load-op acc ist pc mem in out f))
-            ((and (>= ist 600) (< ist 700)) (branch-op acc ist pc mem in out f))
-            ((and (>= ist 700) (< ist 800)) (branch-zero-op acc ist pc mem in out f))
-            ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem in out f))
-            ((= ist 901) (input-op acc pc mem in out f))
-            ((= ist 902) (output-op acc pc mem in out f))
-            ((and (>= ist 0) (< ist 100)) (halt-op acc pc mem in out f)))))  
+    (cond ((and (>= ist 100) (< ist 200)) (add-op acc ist pc mem in out))
+          ((and (>= ist 200) (< ist 300)) (sub-op acc ist pc mem in out))
+          ((and (>= ist 300) (< ist 400)) (store-op acc ist pc mem in out f))
+          ((and (>= ist 500) (< ist 600)) (load-op acc ist pc mem in out f))
+          ((and (>= ist 600) (< ist 700)) (branch-op acc ist pc mem in out f))
+          ((and (>= ist 700) (< ist 800)) (branch-zero-op acc ist pc mem in out f))
+          ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem in out f))
+          ((= ist 901) (input-op acc pc mem in out f))
+          ((= ist 902) (output-op acc pc mem in out f))
+          ((and (>= ist 0) (< ist 100)) (halt-op acc pc mem in out f))))))  
 
 ;; somma (1xx)
 (defun add-op (acc ist pc mem in out) 
-  (setf cell (mod ist 100))
-  (setf a (nth cell mem))
-  (cond ((null a) nil)
-        ((null (mod-1000 (+ a acc))) (new-state (+ a acc) (sum-pc pc) mem in out flag))
-        (T (new-state (+ a acc) (sum-pc pc) mem in out noflag))))
+  (let ((elemento (nth (mod ist 100) mem)))
+    (cond ((null elemento) nil)
+          ((null (mod-1000 (+ elemento acc))) (new-state (+ elemento acc) (sum-pc pc) mem in out flag))
+          (T (new-state (+ elemento acc) (sum-pc pc) mem in out noflag)))))
 
 ;; sottazione (2xx)
 (defun sub-op (acc ist pc mem in out) 
-  (setf cell (mod ist 100))
-  (setf a (nth cell mem))
-  (cond ((null a) nil)
-        ((null (mod-1000 (- acc a))) (new-state (- acc a) (sum-pc pc) mem in out flag))
-        (T (new-state (- acc a) (sum-pc pc) mem in out noflag))))
+  (let ((elemento (nth (mod ist 100) mem)))
+    (cond ((null elemento) nil)
+          ((null (mod-1000 (- acc elemento))) (new-state (- acc elemento) (sum-pc pc) mem in out flag))
+          (T (new-state (- acc elemento) (sum-pc pc) mem in out noflag)))))
 
 ;; store (3xx)
 (defun store-op (acc ist pc mem in out f)
@@ -114,33 +112,32 @@
 
 ;; load (5xx)
 (defun load-op (acc ist pc mem in out f)
-  (setf cell (mod ist 100))
-  (setf a (nth cell mem))
-  (cond ((null a) nil)
-        (T (new-state a (sum-pc pc) mem in out f))))
+  (let ((elemento (nth (mod ist 100) mem)))
+    (cond ((null elemento) nil)
+          (T (new-state elemento (sum-pc pc) mem in out f)))))
 
-;; branch (6xx) (controllo che esiste quella parte di memoria o sti cazzi?)
+;; branch (6xx) 
 (defun branch-op (acc ist pc mem in out f)
-  (setf cell (mod ist 100))
-  (new-state acc cell  mem in out f))
+  (let ((cell (mod ist 100)))
+    (new-state acc cell mem in out f)))
 
 ;; branch if zero (7xx) 
 (defun branch-zero-op (acc ist pc mem in out f)
-  (setf cell (mod ist 100))
-  (if (and (equal f flag) (= acc 0)) (new-state acc cell mem in out f)
-    nil))
+  (let ((cell (mod ist 100)))
+    (if (and (equal f noflag) (= acc 0)) (new-state acc cell mem in out f)
+      nil)))
 
 ;; branch if positive (8xx) 
 (defun branch-positive-op (acc ist pc mem in out f)
-  (setf cell (mod ist 100))
-  (if (equal f flag) (new-state acc cell mem in out f)
-    nil))
+  (let ((cell (mod ist 100)))
+    (if (equal f noflag) (new-state acc cell mem in out f)
+      nil)))
     
 ;; input (901)
 (defun input-op (acc pc mem in out f)
-  (setf primo (first in))
-  (cond ((null primo) nil)
-        (T (new-state primo (sum-pc pc) mem (rest in) out f))))
+  (let (( primo (first in)))
+    (cond ((null primo) nil)
+          (T (new-state primo (sum-pc pc) mem (rest in) out f)))))
 
 ;; output (902)
 (defun output-op (acc pc mem in out f)
@@ -159,24 +156,24 @@
 
 ;; controlla se è halted-state o è arrivata alla fine della memoria
 (defun exe-out (s l)
-  (setf newstate (one-instruction s))
-  (cond ((halted-state-p newstate) (halted-state-OUT newstate))
-        ((null (cdr l)) nil)
-        (T (exe-out newstate (cdr l)))))
+  (let ((newstate (one-instruction s)))
+    (cond ((halted-state-p newstate) (halted-state-OUT newstate))
+          ((null (cdr l)) nil)
+          (T (exe-out newstate (cdr l))))))
   
 ;; aggiunge alla memoria 0 fino ad arrivare a 100 elementi
 (defun aggiungi-zeri (l)
   (if (< (length l) 100)
-      (and (setf app (make-list (- 100 (length l)) :initial-element 0)) (append l app))
+      (let ((app (make-list (- 100 (length l)) :initial-element 0)))
+         (append l app))
     nil))
-      
 
 ;; lmc-load legge il file e produce la memoria iniziale 
 (defun lmc-load (file)
-  (split-string (with-open-file (in file
+  (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)) 0))
+    (read-list-from in)))
   
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -189,6 +186,11 @@
 
 (defun remove-all (stringa)
   (remove #\Space (remove #\Tab (remove #\Newline stringa))))
+
+(defun is-commento (s)
+  (let ((first-slash (position #\/ s)))
+    (cond ((null first-slash) nil)
+          ((not (null (position #\/ s :start (+ first-slash 1)))) T))))
 
   
 

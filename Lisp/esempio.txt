@@ -1,10 +1,5 @@
-           
-LOOP    brz END
-        sub ONE
-        sta SECOND
-        lda RESULT
-        add FIRST
-        sta RESULT
-
-        lda SECOND
-        bra LOOP
+ciao
+ciao//commento
+ciao/voleeevi
+ciao//
+//beela
