@@ -4,6 +4,7 @@
 
 ;; inizio 28/11
 ;; CREA BENE L'INTESTAZIONE DEL FILE
+;; sistema la store (togli setf)
 
 ;; controlla che la memoria sia 100 celle
 (defun mem-is-in-range (x)
@@ -22,8 +23,7 @@
 
 ;; incrementa pc di 1. Se è 99 allora il prox numero è 0
 (defun sum-pc (x)
-  (if (null (mod-100 (+ 1 x))) 
-    0
+  (if (null (mod-100 (+ 1 x))) 0
     (+ 1 x)))
 
 ;; controlla che gli elementi siano tutti compresi tra 0 e 999
@@ -65,19 +65,19 @@
 ;; controllo se non ci sono errori
 (defun one-instruction (s) 
   (cond ((null (state-p s)) nil)
-        (T (setf acc (state-ACC s))
-           (setf pc (state-PC s))
-           (setf mem (state-MEM s))
-           (setf in (state-IN s))
-           (setf out (state-OUT s))
-           (setf f (state-FLAG s))
-           (scorri-mem acc pc mem in out f))))
+        (T (let ((acc (state-ACC s))
+             (pc (state-PC s))
+             (mem (state-MEM s))
+             (in (state-IN s))
+             (out (state-OUT s))
+             (f (state-FLAG s)))
+             (scorri-mem acc pc mem in out f))))) 
 
 ;; scorro la memoria
 (defun scorri-mem (acc pc mem in out f) 
-  (setf ist (nth pc mem))
-  ;;(print ist)
-  (if (null ist) nil
+  (let ((ist (nth pc mem)))
+    ;;(print ist)
+    (if (null ist) nil
       (cond ((and (>= ist 100) (< ist 200)) (add-op acc ist pc mem in out))
             ((and (>= ist 200) (< ist 300)) (sub-op acc ist pc mem in out))
             ((and (>= ist 300) (< ist 400)) (store-op acc ist pc mem in out f))
@@ -87,23 +87,21 @@
             ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem in out f))
             ((= ist 901) (input-op acc pc mem in out f))
             ((= ist 902) (output-op acc pc mem in out f))
-            ((and (>= ist 0) (< ist 100)) (halt-op acc pc mem in out f)))))  
+            ((and (>= ist 0) (< ist 100)) (halt-op acc pc mem in out f))))))
 
 ;; somma (1xx)
 (defun add-op (acc ist pc mem in out) 
-  (setf cell (mod ist 100))
-  (setf a (nth cell mem))
-  (cond ((null a) nil)
-        ((null (mod-1000 (+ a acc))) (new-state (+ a acc) (sum-pc pc) mem in out flag))
-        (T (new-state (+ a acc) (sum-pc pc) mem in out noflag))))
+  (let ((a (nth (mod ist 100) mem)))
+    (cond ((null a) nil)
+          ((null (mod-1000 (+ a acc))) (new-state (+ a acc) (sum-pc pc) mem in out flag))
+          (T (new-state (+ a acc) (sum-pc pc) mem in out noflag)))))
 
 ;; sottazione (2xx)
 (defun sub-op (acc ist pc mem in out) 
-  (setf cell (mod ist 100))
-  (setf a (nth cell mem))
-  (cond ((null a) nil)
-        ((null (mod-1000 (- acc a))) (new-state (- acc a) (sum-pc pc) mem in out flag))
-        (T (new-state (- acc a) (sum-pc pc) mem in out noflag))))
+  (let ((a (nth (mod ist 100) mem)))
+    (cond ((null a) nil)
+          ((null (mod-1000 (- acc a))) (new-state (- acc a) (sum-pc pc) mem in out flag))
+          (T (new-state (- acc a) (sum-pc pc) mem in out noflag)))))
 
 ;; store (3xx)
 (defun store-op (acc ist pc mem in out f)
@@ -114,12 +112,11 @@
 
 ;; load (5xx)
 (defun load-op (acc ist pc mem in out f)
-  (setf cell (mod ist 100))
-  (setf a (nth cell mem))
+  (let ((a (nth (mod ist 100) mem)))
   (cond ((null a) nil)
-        (T (new-state a (sum-pc pc) mem in out f))))
+        (T (new-state a (sum-pc pc) mem in out f)))))
 
-;; branch (6xx) (controllo che esiste quella parte di memoria o sti cazzi?)
+;; branch (6xx) 
 (defun branch-op (acc ist pc mem in out f)
   (setf cell (mod ist 100))
   (new-state acc cell  mem in out f))
@@ -176,13 +173,17 @@
   (with-open-file (in file
                       :direction :input
                       :if-does-not-exist :error)
-    (read-list-from in)))
+    (setf lista (read-list-from in)))
+ )
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
-    (unless (eq e 'eof) (print e)
+    (unless (eq e 'eof)
       (cons e (read-list-from input-stream)))))
-        
+
+(defun lunghezza-elementi (lista)
+  (cond ((null (cdr lista) T))
+        ((= (length (car lista)))))) 
 
 
 ;; lmc-run produce la coda di output (execution-loop)
