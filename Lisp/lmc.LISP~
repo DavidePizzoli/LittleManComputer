@@ -173,17 +173,16 @@
 ;;; rimuovo i commenti
 ;;; rimuovo le stringhe vuote
 ;;; splitto la stringa (spazi)
-
 (defun lmc-load (file)
-   (memoria-iniziale
-     (rimuovi-parole-vuote 
-      (split-lista 
-       (rimuovi-stringhe-vuote 
-        (rimuovi-commenti 
-         (with-open-file (in file
-                             :direction :input
-                             :if-does-not-exist :error)
-           (read-list-from in))))))))
+  (scorri-righe 
+   (rimuovi-parole-vuote 
+    (split-lista 
+     (rimuovi-stringhe-vuote 
+      (rimuovi-commenti 
+       (with-open-file (in file
+                           :direction :input
+                           :if-does-not-exist :error)
+         (read-list-from in))))))))
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -234,35 +233,29 @@
 	(split-stringa-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r)) 
       (cons string r))))
 
-(defun memoria-iniziale (l)
-  (reduce #'append (lista-etichette l)))
-
-
 (defun type-instruction (s)
-  (cond ((string-equal s "ADD") 100)
-        ((string-equal s "SUB") 200)
-        ((string-equal s "STA") 300)
-        ((string-equal s "LDA") 500)
-        ((string-equal s "BRA") 600)
-        ((string-equal s "BRZ") 700)
-        ((string-equal s "BRP") 800)
-        ((string-equal s "INP") 901)
-        ((string-equal s "OUT") 902)
-        ((string-equal s "HLT") 0)))
+  (cond ((eq s "ADD") 100)
+        ((eq s "SUB") 200)
+        ((eq s "STA") 300)
+        ((eq s "LDA") 500)
+        ((eq s "BRA") 600)
+        ((eq s "BRZ") 700)
+        ((eq s "BRP") 800)
+        ((eq s "INP") 901)
+        ((eq s "OUT") 902)
+        ((eq s "HLT") 0)))
 
-(defun lista-etichette (l)
+;; ti vede solo la prima parola della lista 
+(defun scorri-righe (l)
   (unless (null (first l))
-      (cons (scorri-parole (first l)) (lista-etichette (rest l)))))
+    (unless (null (first (first l)))
+     (cons (controlla-parola (first (first l))) (scorri-righe (rest l))))))
 
-(defun scorri-parole (l)
-  (unless (null (first l))
-    (cond ((null (type-instruction (first l)))
-           (cons (first l) (scorri-parole (rest l))))
-          (T (scorri-parole (rest l))))))
-
+(defun controlla-parola (s)
+  s)
 
 ;; lmc-run produce la coda di output (execution-loop)
-;; C:/Users/Alessandra/Desktop/LittleManComputer/Lisp/esempio.txt
+
 
 
 ;;;; end of file -- lmc.lisp 
