@@ -125,13 +125,13 @@
 (defun branch-zero-op (acc ist pc mem in out f)
   (let ((cell (mod ist 100)))
     (if (and (equal f noflag) (= acc 0)) (new-state acc cell mem in out f)
-      nil)))
+      (new-state acc (sum-pc pc) mem in out f))))
 
 ;;; branch if positive (8xx) 
 (defun branch-positive-op (acc ist pc mem in out f)
   (let ((cell (mod ist 100)))
     (if (equal f noflag) (new-state acc cell mem in out f)
-      nil)))
+       (new-state acc (sum-pc pc) mem in out f))))
     
 ;;; input (901)
 (defun input-op (acc pc mem in out f)
@@ -174,14 +174,15 @@
 ;;; rimuovo le stringhe vuote
 ;;; splitto la stringa (spazi)
 (defun lmc-load (file)
+  (scorri-righe 
    (rimuovi-parole-vuote 
     (split-lista 
      (rimuovi-stringhe-vuote 
       (rimuovi-commenti 
        (with-open-file (in file
-                      :direction :input
-                      :if-does-not-exist :error)
-    (read-list-from in)))))))
+                           :direction :input
+                           :if-does-not-exist :error)
+         (read-list-from in))))))))
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -208,8 +209,8 @@
 
 ;;; rimuove tutte le righe vuote ("") dalla lista
 (defun rimuovi-parole-vuote (l)
-  (cond ((not (null (first l)))
-         (cons (rimuovi-stringhe-vuote (first l)) (rimuovi-parole-vuote (rest l))))))
+  (unless (null (first l))
+         (cons (rimuovi-stringhe-vuote (first l)) (rimuovi-parole-vuote (rest l)))))
 
 (defun rimuovi-stringhe-vuote (l)
   (remove "" l :test #'equal))
@@ -217,11 +218,11 @@
 
 ;; split della stringa dagli spazi
 (defun split-lista (l)
-  (cond ((not (null (first l)))
-         (cons (split-stringa (first l) " ") (split-lista (rest l))))))
+  (unless (null (first l))
+         (cons (split-stringa (first l) " ") (split-lista (rest l)))))
 
 (defun split-stringa (string &optional (separator " "))
-  (split-str-1 string separator))
+  (split-stringa-1 string separator))
 
 (defun split-stringa-1 (string &optional (separator " ") (r nil))
   (let ((n (position separator string
@@ -232,10 +233,29 @@
 	(split-stringa-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r)) 
       (cons string r))))
 
+(defun type-instruction (s)
+  (cond ((eq s "ADD") 100)
+        ((eq s "SUB") 200)
+        ((eq s "STA") 300)
+        ((eq s "LDA") 500)
+        ((eq s "BRA") 600)
+        ((eq s "BRZ") 700)
+        ((eq s "BRP") 800)
+        ((eq s "INP") 901)
+        ((eq s "OUT") 902)
+        ((eq s "HLT") 0)))
 
+;; ti vede solo la prima parola della lista 
+(defun scorri-righe (l)
+  (unless (null (first l))
+    (unless (null (first (first l)))
+     (cons (controlla-parola (first (first l))) (scorri-righe (rest l))))))
+
+(defun controlla-parola (s)
+  s)
 
 ;; lmc-run produce la coda di output (execution-loop)
 
 
 
-;;;; end of file -- lmc.lisp 
+;;;; end of file -- lmc.lisp    
