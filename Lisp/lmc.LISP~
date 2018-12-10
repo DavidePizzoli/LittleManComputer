@@ -182,7 +182,7 @@
        (with-open-file (in file
                            :direction :input
                            :if-does-not-exist :error)
-         (read-list-from in)))))))
+         (read-list-from in))))))))
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
@@ -231,7 +231,7 @@
 			       (find y x :test #'string=)))))
     (if n
 	(split-stringa-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r)) 
-      (cons string r)))))
+      (cons string r))))
 
 (defun type-instruction (s)
   (cond ((eq s "ADD") 100)
@@ -245,9 +245,14 @@
         ((eq s "OUT") 902)
         ((eq s "HLT") 0)))
 
+;; ti vede solo la prima parola della lista 
+(defun scorri-righe (l)
+  (unless (null (first l))
+    (unless (null (first (first l)))
+     (cons (controlla-parola (first (first l))) (scorri-righe (rest l))))))
 
-(defun socrri-righe (l)
-  (print first l))
+(defun controlla-parola (s)
+  s)
 
 ;; lmc-run produce la coda di output (execution-loop)
 

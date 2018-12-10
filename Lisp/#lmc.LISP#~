@@ -20,7 +20,7 @@
   (if (and (> x -1) (< x 1000)) T
     nil))
 
-;;; incrementa pc di 1. Se è 99 allora il prox numero è 0
+;;; incrementa pc di 1. Se Ã¨ 99 allora il prox numero Ã¨ 0
 (defun sum-pc (x)
   (if (null (mod-100 (+ 1 x))) 
     0
@@ -154,7 +154,7 @@
   (cond ((null (state-p s)) nil)
         (T (exe-out s (state-MEM s)))))
 
-;;; controlla se è halted-state o è arrivata alla fine della memoria
+;;; controlla se Ã¨ halted-state o Ã¨ arrivata alla fine della memoria
 (defun exe-out (s l)
   (let ((newstate (one-instruction s)))
     (cond ((halted-state-p newstate) (halted-state-OUT newstate))
@@ -209,16 +209,16 @@
 ;;; rimuove tutte le righe vuote ("") dalla lista
 (defun rimuovi-parole-vuote (l)
   (unless (null (first l))
-         (cons (rimuovi-stringhe-vuote (first l)) (rimuovi-parole-vuote (rest l)))))
+         (cons (rimuovi-stringhe-vuote (first l "")) (rimuovi-parole-vuote (rest l)))))
 
-(defun rimuovi-stringhe-vuote (l)
-  (remove "" l :test #'equal))
-  
+(defun rimuovi-stringhe-vuote (l c)
+  (remove c l :test #'equal))
 
 ;; split della stringa dagli spazi
 (defun split-lista (l)
   (unless (null (first l))
-         (cons (split-stringa (first l) " ") (split-lista (rest l)))))
+    (let primo (first l)
+         (cons (split-stringa primo "") (split-lista (rest l)))))
 
 (defun split-stringa (string &optional (separator " "))
   (split-stringa-1 string separator))
@@ -258,6 +258,6 @@
 
 ;; lmc-run produce la coda di output (execution-loop)
 
-
+;; C:/Users/lenovo/Desktop/829775_Rota_Alessandra_LP_E1P_2018_LMC/Lisp/esempio.txt
 
 ;;;; end of file -- lmc.lisp    
