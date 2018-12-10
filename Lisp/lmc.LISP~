@@ -275,12 +275,11 @@
 
 (defun istruzione-riga (l e)
     (cond ((= (length l) 1) (codice-istruzione (first l) 0))
-          ((= (length l) 2) (codice-istruzione (first l) (val-etichetta (second l) e)))
-          ((= (length l) 3)
-           (cond ((is-etichetta (first l))
-                  (cond ((every #'alpha-char-p (third l))
-                         (codice-istruzione (second l) (val-etichetta (third l) e)))
-                        (T (codice-istruzione (second l) (parse-integer (third l))))))))))
+          ((= (length l) 2) 
+           (cond ((null (is-etichetta (first l)))
+                  (codice-istruzione (first l) (val-etichetta (second l) e)))
+                 (T (third l))))
+          ((= (length l) 3) (codice-istruzione (second l) (val-etichetta (third l) e)))))
 
 (defun val-etichetta (s e)
   (unless (null (first e))
