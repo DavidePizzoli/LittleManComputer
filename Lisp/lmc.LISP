@@ -173,22 +173,25 @@
 ;;; rimuovo i commenti
 ;;; rimuovo le stringhe vuote
 ;;; splitto la stringa (spazi)
-
 (defun lmc-load (file)
-   (memoria-iniziale
-     (rimuovi-parole-vuote 
-      (split-lista 
-       (rimuovi-stringhe-vuote 
-        (rimuovi-commenti 
-         (with-open-file (in file
-                             :direction :input
-                             :if-does-not-exist :error)
-           (read-list-from in))))))))
+  (gestione-file
+   (with-open-file (in file
+                       :direction :input
+                       :if-does-not-exist :error)
+     (read-list-from in))))
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
     (unless (eq e 'eof) ;;(print e)
       (cons e (read-list-from input-stream)))))
+
+(defun gestione-file (l)
+  (lista-etichette
+   (rimuovi-liste-nil
+    (rimuovi-parole-vuote 
+     (split-lista 
+      (rimuovi-stringhe-vuote 
+       (rimuovi-commenti l))))) 0))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento
 (defun contains-commento (s)
@@ -210,12 +213,15 @@
 
 ;;; rimuove tutte le righe vuote ("") dalla lista
 (defun rimuovi-parole-vuote (l)
-  (unless (null (first l))
-         (cons (rimuovi-stringhe-vuote (first l)) (rimuovi-parole-vuote (rest l)))))
+  (let ((primo (first l)))
+    (unless (null (first l))
+      (cons (rimuovi-stringhe-vuote primo) (rimuovi-parole-vuote (rest l))))))
 
 (defun rimuovi-stringhe-vuote (l)
   (remove "" l :test #'equal))
-  
+
+(defun rimuovi-liste-nil (l)
+  (remove nil l :test #'equal))
 
 ;; split della stringa dagli spazi
 (defun split-lista (l)
@@ -234,35 +240,43 @@
 	(split-stringa-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r)) 
       (cons string r))))
 
-(defun memoria-iniziale (l)
-  (reduce #'append (lista-etichette l)))
+(defun is-etichetta (s)
+  (if (and (not (string-equal s "ADD"))
+             (not (string-equal s "SUB"))
+             (not (string-equal s "STA"))
+             (not (string-equal s "LDA"))
+             (not (string-equal s "BRA"))
+             (not (string-equal s "BRZ"))
+             (not (string-equal s "BRP"))
+             (not (string-equal s "INP"))
+             (not (string-equal s "OUT"))
+             (not (string-equal s "HLT"))
+             (not (string-equal s "DAT"))) s
+         nil))
 
+(defun controlla-parola (s)
+  s)
 
-(defun type-instruction (s)
-  (cond ((string-equal s "ADD") 100)
-        ((string-equal s "SUB") 200)
-        ((string-equal s "STA") 300)
-        ((string-equal s "LDA") 500)
-        ((string-equal s "BRA") 600)
-        ((string-equal s "BRZ") 700)
-        ((string-equal s "BRP") 800)
-        ((string-equal s "INP") 901)
-        ((string-equal s "OUT") 902)
-        ((string-equal s "HLT") 0)))
+(defun lista-etichette (l cont)
+  (let ((primo (first l)))
+    (unless (null primo)
+      (let ((etichetta (lista-etichette-riga primo cont)))
+        (cond ((null etichetta)
+             (lista-etichette (rest l) (+ 1 cont)))
+            (T (cons etichetta (lista-etichette (rest l) (+ 1 cont)))))))))
 
-(defun lista-etichette (l)
+(defun lista-etichette-riga (l cont)
   (unless (null (first l))
-      (cons (scorri-parole (first l)) (lista-etichette (rest l)))))
+    (cond ((not (null (is-etichetta (first l))))
+          (list (is-etichetta (first l)) cont)))))
 
-(defun scorri-parole (l)
-  (unless (null (first l))
-    (cond ((null (type-instruction (first l)))
-           (cons (first l) (scorri-parole (rest l))))
-          (T (scorri-parole (rest l))))))
+      
+
+
 
 
 ;; lmc-run produce la coda di output (execution-loop)
-;; C:/Users/Alessandra/Desktop/LittleManComputer/Lisp/esempio.txt
 
+;; C:/Users/lenovo/Desktop/829775_Rota_Alessandra_LP_E1P_2018_LMC/Lisp/esempio.txt
 
-;;;; end of file -- lmc.lisp 
+;;;; end of file -- lmc.lisp    
