@@ -174,19 +174,24 @@
 ;;; rimuovo le stringhe vuote
 ;;; splitto la stringa (spazi)
 (defun lmc-load (file)
-   (rimuovi-parole-vuote 
-    (split-lista 
-     (rimuovi-stringhe-vuote 
-      (rimuovi-commenti 
-       (with-open-file (in file
-                           :direction :input
-                           :if-does-not-exist :error)
-         (read-list-from in)))))))
+  (gestione-file
+   (with-open-file (in file
+                       :direction :input
+                       :if-does-not-exist :error)
+     (read-list-from in))))
 
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
     (unless (eq e 'eof) ;;(print e)
       (cons e (read-list-from input-stream)))))
+
+(defun gestione-file (l)
+  (lista-etichette
+   (rimuovi-liste-nil
+    (rimuovi-parole-vuote 
+     (split-lista 
+      (rimuovi-stringhe-vuote 
+       (rimuovi-commenti l))))) 0))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento
 (defun contains-commento (s)
@@ -208,12 +213,15 @@
 
 ;;; rimuove tutte le righe vuote ("") dalla lista
 (defun rimuovi-parole-vuote (l)
-  (unless (null (first l))
-         (cons (rimuovi-stringhe-vuote (first l)) (rimuovi-parole-vuote (rest l)))))
+  (let ((primo (first l)))
+    (unless (null (first l))
+      (cons (rimuovi-stringhe-vuote primo) (rimuovi-parole-vuote (rest l))))))
 
 (defun rimuovi-stringhe-vuote (l)
   (remove "" l :test #'equal))
-  
+
+(defun rimuovi-liste-nil (l)
+  (remove nil l :test #'equal))
 
 ;; split della stringa dagli spazi
 (defun split-lista (l)
@@ -249,15 +257,26 @@
 (defun controlla-parola (s)
   s)
 
-(defun lista-etichette (l)
+(defun lista-etichette (l cont)
+  (let ((primo (first l)))
+    (unless (null primo)
+      (let ((etichetta (lista-etichette-riga primo cont)))
+        (cond ((null etichetta)
+             (lista-etichette (rest l) (+ 1 cont)))
+            (T (cons etichetta (lista-etichette (rest l) (+ 1 cont)))))))))
+
+(defun lista-etichette-riga (l cont)
   (unless (null (first l))
-    (cons (is-etichetta (first (first l))) (lista-etichette (rest l)))))
+    (cond ((not (null (is-etichetta (first l))))
+          (list (is-etichetta (first l)) cont)))))
+
+      
 
 
 
 
 ;; lmc-run produce la coda di output (execution-loop)
 
-
+;; C:/Users/lenovo/Desktop/829775_Rota_Alessandra_LP_E1P_2018_LMC/Lisp/esempio.txt
 
 ;;;; end of file -- lmc.lisp    

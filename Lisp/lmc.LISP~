@@ -174,7 +174,7 @@
 ;;; rimuovo le stringhe vuote
 ;;; splitto la stringa (spazi)
 (defun lmc-load (file)
-  (scorri-righe 
+  (rimuovi-nil-lista
    (rimuovi-parole-vuote 
     (split-lista 
      (rimuovi-stringhe-vuote 
@@ -214,7 +214,9 @@
 
 (defun rimuovi-stringhe-vuote (l)
   (remove "" l :test #'equal))
-  
+
+(defun rimuovi-nil-lista (l)
+  (remove nil l :test #'equal))
 
 ;; split della stringa dagli spazi
 (defun split-lista (l)
@@ -233,29 +235,39 @@
 	(split-stringa-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r)) 
       (cons string r))))
 
-(defun type-instruction (s)
-  (cond ((eq s "ADD") 100)
-        ((eq s "SUB") 200)
-        ((eq s "STA") 300)
-        ((eq s "LDA") 500)
-        ((eq s "BRA") 600)
-        ((eq s "BRZ") 700)
-        ((eq s "BRP") 800)
-        ((eq s "INP") 901)
-        ((eq s "OUT") 902)
-        ((eq s "HLT") 0)))
-
-;; ti vede solo la prima parola della lista 
-(defun scorri-righe (l)
-  (unless (null (first l))
-    (unless (null (first (first l)))
-     (cons (controlla-parola (first (first l))) (scorri-righe (rest l))))))
+(defun is-etichetta (s)
+  (if (and (not (string-equal s "ADD"))
+             (not (string-equal s "SUB"))
+             (not (string-equal s "STA"))
+             (not (string-equal s "LDA"))
+             (not (string-equal s "BRA"))
+             (not (string-equal s "BRZ"))
+             (not (string-equal s "BRP"))
+             (not (string-equal s "INP"))
+             (not (string-equal s "OUT"))
+             (not (string-equal s "HLT"))
+             (not (string-equal s "DAT"))) s
+         nil))
 
 (defun controlla-parola (s)
   s)
 
+(defun lista-etichette (l cont)
+  (let ((primo (first l)))
+    print primo
+    (unless (null primo)
+      (cons (lista-etichette-riga primo cont) (lista-etichette (rest l))))))
+
+(defun lista-etichette-riga (l cont)
+  print l
+  (unless (null (first l))
+    (cons (is-etichetta (first l)) (+ cont 1))))
+
+
+
+
 ;; lmc-run produce la coda di output (execution-loop)
 
-
+;; C:/Users/lenovo/Desktop/829775_Rota_Alessandra_LP_E1P_2018_LMC/Lisp/esempio.txt
 
 ;;;; end of file -- lmc.lisp    
