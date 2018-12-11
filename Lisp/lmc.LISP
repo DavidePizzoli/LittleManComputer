@@ -192,7 +192,9 @@
                    (rimuovi-stringhe-vuote 
                     (rimuovi-commenti l)))))))
     (let ((etichette (lista-etichette lista 0)))
-      (genera-memoria lista etichette))))
+      (let ((mem (genera-memoria lista etichette)))
+        (cond ((< 100 (length mem)) (aggiungi-zeri mem))
+              (T mem))))))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento
 (defun contains-commento (s)
@@ -242,17 +244,18 @@
       (cons string r))))
 
 (defun is-etichetta (s)
-  (if (and (not (string-equal s "ADD"))
-             (not (string-equal s "SUB"))
-             (not (string-equal s "STA"))
-             (not (string-equal s "LDA"))
-             (not (string-equal s "BRA"))
-             (not (string-equal s "BRZ"))
-             (not (string-equal s "BRP"))
-             (not (string-equal s "INP"))
-             (not (string-equal s "OUT"))
-             (not (string-equal s "HLT"))
-             (not (string-equal s "DAT"))) s
+  (if (and (not (numberp (digit-char-p (char s 0))))
+           (not (string-equal s "ADD"))
+           (not (string-equal s "SUB"))
+           (not (string-equal s "STA"))
+           (not (string-equal s "LDA"))
+           (not (string-equal s "BRA"))
+           (not (string-equal s "BRZ"))
+           (not (string-equal s "BRP"))
+           (not (string-equal s "INP"))
+           (not (string-equal s "OUT"))
+           (not (string-equal s "HLT"))
+           (not (string-equal s "DAT"))) s
          nil))
 
 (defun lista-etichette (l cont)
@@ -269,16 +272,23 @@
           (list (is-etichetta (first l)) cont)))))
 
 (defun genera-memoria (l e)
+  ;;(print e)
   (let ((primo (first l)))
     (unless (null primo)
       (cons (istruzione-riga primo e) (genera-memoria (rest l) e)))))
 
 (defun istruzione-riga (l e)
     (cond ((= (length l) 1) (codice-istruzione (first l) 0))
-          ((= (length l) 2) (codice-istruzione (first l) (val-etichetta (second l) e)))
+          ((= (length l) 2) 
+           (cond ((null (is-etichetta (first l)))
+                  (cond ((null (is-etichetta (second l)))
+                         (codice-istruzione (first l) (parse-integer (second l))))
+                        (T (codice-istruzione (first l) (val-etichetta (second l) e)))))
+                 (T (codice-istruzione (second l) 0))))
+                  
           ((= (length l) 3)
            (cond ((is-etichetta (first l))
-                  (cond ((every #'alpha-char-p (third l))
+                    (cond ((is-etichetta (third l))
                          (codice-istruzione (second l) (val-etichetta (third l) e)))
                         (T (codice-istruzione (second l) (parse-integer (third l))))))))))
 
@@ -306,7 +316,9 @@
         ((string-equal s "HLT") 0)
         ((string-equal s "DAT") val)))
 
-      
+(defun lmc-run (file input)
+  (let ((mem (lmc-load file)))
+    (execution-loop (new-state 0 0 mem input '() noflag))))
 
 
 
