@@ -193,7 +193,7 @@
                     (rimuovi-commenti l)))))))
     (let ((etichette (lista-etichette lista 0)))
       (let ((mem (genera-memoria lista etichette)))
-        (cond ((< 100 (length mem)) (aggiungi-zeri mem))
+        (cond ((< (length mem) 100) (aggiungi-zeri mem))
               (T mem))))))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento

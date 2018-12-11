@@ -192,7 +192,9 @@
                    (rimuovi-stringhe-vuote 
                     (rimuovi-commenti l)))))))
     (let ((etichette (lista-etichette lista 0)))
-      (aggiungi-zeri (genera-memoria lista etichette)))))
+      (let ((mem (genera-memoria lista etichette)))
+        (cond ((< 100 (length mem)) (aggiungi-zeri mem))
+              (T mem))))))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento
 (defun contains-commento (s)
@@ -278,11 +280,15 @@
 (defun istruzione-riga (l e)
     (cond ((= (length l) 1) (codice-istruzione (first l) 0))
           ((= (length l) 2) 
-           (cond ((is-etichetta (first l)) (codice-istruzione (second l) 0))
-                 (T (codice-istruzione (first l) (val-etichetta (second l) e)))))
+           (cond ((null (is-etichetta (first l)))
+                  (cond ((null (is-etichetta (second l)))
+                         (codice-istruzione (first l) (parse-integer (second l))))
+                        (T (codice-istruzione (first l) (val-etichetta (second l) e)))))
+                 (T (codice-istruzione (second l) 0))))
+                  
           ((= (length l) 3)
            (cond ((is-etichetta (first l))
-                  (cond ((is-etichetta (third l))
+                    (cond ((is-etichetta (third l))
                          (codice-istruzione (second l) (val-etichetta (third l) e)))
                         (T (codice-istruzione (second l) (parse-integer (third l))))))))))
 
