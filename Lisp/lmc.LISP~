@@ -187,14 +187,16 @@
 
 (defun gestione-file (l)
   (let ((lista (rimuovi-liste-nil
-                 (rimuovi-parole-vuote 
-                  (split-lista 
-                   (rimuovi-stringhe-vuote 
+                (rimuovi-parole-vuote 
+                 (split-lista 
+                  (rimuovi-stringhe-vuote 
                     (rimuovi-commenti l)))))))
-    (let ((etichette (lista-etichette lista 0)))
-      (let ((mem (genera-memoria lista etichette)))
-        (cond ((< 100 (length mem)) (aggiungi-zeri mem))
-              (T mem))))))
+    
+    (let ((etichette (controlla-doppie-etichette (lista-etichette lista 0))))
+      (cond ((null etichette) nil)
+            (T (let ((mem (genera-memoria lista etichette)))
+                 (cond ((< (length mem) 100) (aggiungi-zeri mem))
+                       (T mem))))))))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento
 (defun contains-commento (s)
@@ -271,6 +273,16 @@
     (cond ((not (null (is-etichetta (first l))))
           (list (is-etichetta (first l)) cont)))))
 
+(defun controlla-etichette-doppie (l)
+  (let ((prima (first l)))
+    (if (riga)
+        (cond ((null (controlla-etichetta-doppia prima (rest l)))
+               (controlla-etichette-doppie (rest l))))
+      l)))
+
+(defun controlla-etichetta-doppia (prima l))
+                    
+
 (defun genera-memoria (l e)
   ;;(print e)
   (let ((primo (first l)))
@@ -321,11 +333,50 @@
     (execution-loop (new-state 0 0 mem input '() noflag))))
 
 
+;;;;;;;;;;;;;;;;;,
+
+(defun lista-etichette-1 (l cont lista nuova)
+  (let ((riga (first l)))
+    (if (not (null riga))
+        (let ((etichetta (is-etichetta (first riga))))
+          (print etichetta)
+          (cond ((null etichetta) 
+                 (lista-etichette-1 (rest l) (+ 1 cont) lista))
+                (T (if (null (is-in-lista-etichette etichetta lista))
+                       (and (setf lista (push etichetta lista))
+                            (print lista)
+                            (cons (list etichetta cont) (lista-etichette-1 (rest l) (+ 1 cont) lista nuova)))))))
+    )))
+
+(defun tumore (l)
+  (lista-etichette-1 l 0 nil nil))
+
+(defun is-in-lista-etichette (s l)
+  (let ((primo (first l)))
+    (unless (null primo)
+      (cond ((string-equal s primo) primo)
+            (T (is-in-lista-etichette s (rest l)))))))
+
+(defun esempio (l x)
+  (cond ((null (is-in-lista-etichette x l))
+         (setf l (push x l))))
+)
+ 
+
+
+
+
+
+
+
+
 
 
 ;; lmc-run produce la coda di output (execution-loop)
 
 ;; C:/Users/lenovo/Desktop/829775_Rota_Alessandra_LP_E1P_2018_LMC/Lisp/esempio.txt
 ;; C:/Users/Alessandra/Desktop/829775_Rota_Alessandra_LP_E1P_2018_LMC/Lisp/esempio.txt
+;; (("inp") ("sta" "FIRST") ("inp") ("LOOP" "brz" "END") ("sub" "ONE") ("sta" "SECOND") ("lda" "RESULT") ("add" "FIRST") ("sta" "RESULT") ("lda" "SECOND") ("bra" "LOOP") ("END" "lda" "RESULT") ("out") ("hlt") ("ONE" "dat" "1") ("FIRST" "dat") ("SECOND" "dat") ("RESULT" "dat" "0"))
+
 
 ;;;; end of file -- lmc.lisp    
