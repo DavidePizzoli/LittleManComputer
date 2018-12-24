@@ -166,10 +166,11 @@
 
 ;;; controlla se è halted-state o è arrivata alla fine della memoria
 (defun exe-out (s l)
+  (print l)
   (let ((newstate (one-instruction s)))
     (print newstate)
     (cond ((halted-state-p newstate) (halted-state-OUT newstate))
-          ((null (cdr l)) nil)
+          ((null (cdr l)) (print "hjkwehk"))
           (T (exe-out newstate (cdr l))))))
   
 ;;; aggiunge alla memoria 0 fino ad arrivare a 100 elementi
