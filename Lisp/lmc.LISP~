@@ -38,7 +38,8 @@
 
 ;;; definizione di state e halted-state
 (defstruct (state (:type list) :named) A ACC P PC M MEM I IN O OUT F FLAG)
-(defstruct (halted-state (:type list) :named)  A ACC P PC M MEM I IN O OUT F FLAG)
+(defstruct (halted-state (:type list) :named)  A ACC P PC M MEM I IN O OUT
+  F FLAG)
 
 (defun new-state (acc pc mem in out f)
   (if (and (mod-100 pc)
@@ -49,7 +50,8 @@
            (is-lista-1000 mem)
            (is-lista-1000 in)
            (is-lista-1000 out))
-  (make-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem :I :IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
+      (make-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem
+		  :I:IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
 
 (defun new-halted-state (acc pc mem in out f)
   (if (and (mod-100 pc)
@@ -60,7 +62,8 @@
            (is-lista-1000 mem)
            (is-lista-1000 in)
            (is-lista-1000 out))
-  (make-halted-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem :I :IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
+      (make-halted-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem
+			 :I :IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
 
 ;;; controllo se non ci sono errori
 (defun one-instruction (s) 
@@ -83,8 +86,10 @@
           ((and (>= ist 300) (< ist 400)) (store-op acc ist pc mem in out f))
           ((and (>= ist 500) (< ist 600)) (load-op acc ist pc mem in out f))
           ((and (>= ist 600) (< ist 700)) (branch-op acc ist pc mem in out f))
-          ((and (>= ist 700) (< ist 800)) (branch-zero-op acc ist pc mem in out f))
-          ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem in out f))
+          ((and (>= ist 700) (< ist 800)) (branch-zero-op acc ist pc mem in
+							  out f))
+          ((and (>= ist 800) (< ist 900)) (branch-positive-op acc ist pc mem
+							      in out f))
           ((= ist 901) (input-op acc pc mem in out f))
           ((= ist 902) (output-op acc pc mem in out f))
           ((and (>= ist 0) (< ist 100)) (halt-op acc pc mem in out f))))))  
@@ -93,14 +98,16 @@
 (defun add-op (acc ist pc mem in out) 
   (let ((elemento (nth (mod ist 100) mem)))
     (cond ((null elemento) nil)
-          ((null (mod-1000 (+ elemento acc))) (new-state (+ elemento acc) (sum-pc pc) mem in out flag))
+          ((null (mod-1000 (+ elemento acc)))
+	   (new-state (+ elemento acc)(sum-pc pc) mem in out flag))
           (T (new-state (+ elemento acc) (sum-pc pc) mem in out noflag)))))
 
 ;;; sottazione (2xx)
 (defun sub-op (acc ist pc mem in out) 
   (let ((elemento (nth (mod ist 100) mem)))
     (cond ((null elemento) nil)
-          ((null (mod-1000 (- acc elemento))) (new-state (- acc elemento) (sum-pc pc) mem in out flag))
+          ((null (mod-1000 (- acc elemento)))
+	   (new-state (- acc elemento) (sum-pc pc) mem in out flag))
           (T (new-state (- acc elemento) (sum-pc pc) mem in out noflag)))))
 
 ;;; store (3xx)
@@ -108,7 +115,8 @@
   (setf cell (mod ist 100))
   (setf a (nth cell mem))
   (cond ((null a) nil)
-        (T (and (setf (nth cell mem) acc) (new-state acc (sum-pc pc) mem in out f)))))
+        (T (and (setf (nth cell mem) acc)
+		(new-state acc (sum-pc pc) mem in out f)))))
 
 ;;; load (5xx)
 (defun load-op (acc ist pc mem in out f)
@@ -124,7 +132,8 @@
 ;;; branch if zero (7xx) 
 (defun branch-zero-op (acc ist pc mem in out f)
   (let ((cell (mod ist 100)))
-    (if (and (equal f noflag) (= acc 0)) (new-state acc cell mem in out f)
+    (if (and (equal f noflag) (= acc 0))
+	(new-state acc cell mem in out f)
       (new-state acc (sum-pc pc) mem in out f))))
 
 ;;; branch if positive (8xx) 
@@ -192,8 +201,8 @@
                   (rimuovi-stringhe-vuote 
                     (rimuovi-commenti l)))))))
     
-    (let ((etichette (controlla-doppie-etichette (lista-etichette lista 0))))
-      (cond ((null etichette) nil)
+    (let ((etichette (lista-etichette lista 0)))
+      (cond ((null (controlla-etichette-doppie etichette)) nil)
             (T (let ((mem (genera-memoria lista etichette)))
                  (cond ((< (length mem) 100) (aggiungi-zeri mem))
                        (T mem))))))))
@@ -203,12 +212,14 @@
   (let ((first-slash (position #\/ s)))
     (cond ((null first-slash) nil)
           ((null (position #\/ s :start (+ first-slash 1))) nil)
-          (T (= (position #\/ s :start (+ first-slash 1)) (+ first-slash 1)) first-slash))))
+          (T (= (position #\/ s :start (+ first-slash 1)) (+ first-slash 1))
+	     first-slash))))
 
 ;;; rimuove i commenti dalla lista
 (defun rimuovi-commenti (l)
   (cond ((not (null (first l)))
-         (cons (rimuovi-commento-stringa (first l)) (rimuovi-commenti (rest l))))))
+         (cons (rimuovi-commento-stringa (first l))
+	       (rimuovi-commenti (rest l))))))
 
 ;;; torna la subseq della stringa, rimuovendo i commenti
 (defun rimuovi-commento-stringa (s)
@@ -220,7 +231,8 @@
 (defun rimuovi-parole-vuote (l)
   (let ((primo (first l)))
     (unless (null (first l))
-      (cons (rimuovi-stringhe-vuote primo) (rimuovi-parole-vuote (rest l))))))
+      (cons (rimuovi-stringhe-vuote primo)
+	    (rimuovi-parole-vuote (rest l))))))
 
 (defun rimuovi-stringhe-vuote (l)
   (remove "" l :test #'equal))
@@ -242,7 +254,8 @@
 		     :test #'(lambda (x y)
 			       (find y x :test #'string=)))))
     (if n
-	(split-stringa-1 (subseq string 0 n) separator (cons (subseq string (1+ n)) r)) 
+	(split-stringa-1 (subseq string 0 n) separator
+			 (cons (subseq string (1+ n)) r)) 
       (cons string r))))
 
 (defun is-etichetta (s)
@@ -273,15 +286,22 @@
     (cond ((not (null (is-etichetta (first l))))
           (list (is-etichetta (first l)) cont)))))
 
+;; torna T se non ci sono doppie
 (defun controlla-etichette-doppie (l)
-  (let ((prima (first l)))
-    (if (riga)
-        (cond ((null (controlla-etichetta-doppia prima (rest l)))
+  (let ((riga (first l)))
+    (if (not (null riga))
+        (cond ((null (is-etichetta-doppia (first riga) (rest l)))
                (controlla-etichette-doppie (rest l))))
-      l)))
+      T)))
 
-(defun controlla-etichetta-doppia (prima l))
-                    
+;; torna T se c'è una doppia
+(defun is-etichetta-doppia (etichetta l)
+  (let ((riga (first l)))
+    (if (not (null riga))
+        (let ((altra-etichetta (first riga)))
+          (cond ((not (string-equal etichetta altra-etichetta))
+                 (is-etichetta-doppia etichetta (rest l)))
+                (T T))))))
 
 (defun genera-memoria (l e)
   ;;(print e)
@@ -294,15 +314,20 @@
           ((= (length l) 2) 
            (cond ((null (is-etichetta (first l)))
                   (cond ((null (is-etichetta (second l)))
-                         (codice-istruzione (first l) (parse-integer (second l))))
-                        (T (codice-istruzione (first l) (val-etichetta (second l) e)))))
+                         (codice-istruzione (first l)
+					    (parse-integer (second l))))
+                        (T (codice-istruzione (first l)
+					      (val-etichetta (second l) e)))))
                  (T (codice-istruzione (second l) 0))))
                   
           ((= (length l) 3)
            (cond ((is-etichetta (first l))
                     (cond ((is-etichetta (third l))
-                         (codice-istruzione (second l) (val-etichetta (third l) e)))
-                        (T (codice-istruzione (second l) (parse-integer (third l))))))))))
+			   (codice-istruzione (second l)
+					      (val-etichetta (third l) e)))
+			  (T (codice-istruzione
+			      (second l)
+			      (parse-integer (third l))))))))))
 
 (defun val-etichetta (s e)
   (unless (null (first e))
@@ -331,36 +356,6 @@
 (defun lmc-run (file input)
   (let ((mem (lmc-load file)))
     (execution-loop (new-state 0 0 mem input '() noflag))))
-
-
-;;;;;;;;;;;;;;;;;,
-
-(defun lista-etichette-1 (l cont lista nuova)
-  (let ((riga (first l)))
-    (if (not (null riga))
-        (let ((etichetta (is-etichetta (first riga))))
-          (print etichetta)
-          (cond ((null etichetta) 
-                 (lista-etichette-1 (rest l) (+ 1 cont) lista))
-                (T (if (null (is-in-lista-etichette etichetta lista))
-                       (and (setf lista (push etichetta lista))
-                            (print lista)
-                            (cons (list etichetta cont) (lista-etichette-1 (rest l) (+ 1 cont) lista nuova)))))))
-    )))
-
-(defun tumore (l)
-  (lista-etichette-1 l 0 nil nil))
-
-(defun is-in-lista-etichette (s l)
-  (let ((primo (first l)))
-    (unless (null primo)
-      (cond ((string-equal s primo) primo)
-            (T (is-in-lista-etichette s (rest l)))))))
-
-(defun esempio (l x)
-  (cond ((null (is-in-lista-etichette x l))
-         (setf l (push x l))))
-)
  
 
 

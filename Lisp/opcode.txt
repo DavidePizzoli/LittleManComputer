@@ -80,12 +80,12 @@ dat 0
 dat 0
 dat 0
 staOp dat 300
-op dat 0 // generated instruction
-bra ret // return to the "caller"
+op dat 0// generated instruction
+bra ret// return to the "caller"
 tmp dat 0
 sp dat 0
 one dat 1
-farAway sta first // overwrite the first memory location
+farAway sta first// overwrite the first memory location
 continue inp // get one number in input
 brz first // if it is zero start to execute
 sta tmp // save the number in tmp

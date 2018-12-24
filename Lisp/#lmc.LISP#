@@ -18,9 +18,9 @@
 ;;; controlla che x sia compreso tra 0 e 999
 (defun mod-1000 (x)
   (if (and (> x -1) (< x 1000)) T
-    nil))
+    (mod x 1000)))
 
-;;; incrementa pc di 1. Se è 99 allora il prox numero è 0
+;;; incrementa pc di 1. Se Ã¨ 99 allora il prox numero Ã¨ 0
 (defun sum-pc (x)
   (if (null (mod-100 (+ 1 x))) 
     0
@@ -98,17 +98,17 @@
 (defun add-op (acc ist pc mem in out) 
   (let ((elemento (nth (mod ist 100) mem)))
     (cond ((null elemento) nil)
-          ((null (mod-1000 (+ elemento acc)))
-	   (new-state (+ elemento acc)(sum-pc pc) mem in out flag))
-          (T (new-state (+ elemento acc) (sum-pc pc) mem in out noflag)))))
+          ((not (numberp (mod-1000 (+ elemento acc))))
+	   (new-state (+ elemento acc)(sum-pc pc) mem in out noflag))
+          (T (new-state (mod-1000 (+ elemento acc)) (sum-pc pc) mem in out flag)))))
 
 ;;; sottazione (2xx)
 (defun sub-op (acc ist pc mem in out) 
   (let ((elemento (nth (mod ist 100) mem)))
     (cond ((null elemento) nil)
-          ((null (mod-1000 (- acc elemento)))
-	   (new-state (- acc elemento) (sum-pc pc) mem in out flag))
-          (T (new-state (- acc elemento) (sum-pc pc) mem in out noflag)))))
+          ((not (numberp (mod-1000 (- acc elemento))))
+	   (new-state (- acc elemento) (sum-pc pc) mem in out noflag))
+          (T (new-state (mod-1000 (- acc elemento)) (sum-pc pc) mem in out flag)))))
 
 ;;; store (3xx)
 (defun store-op (acc ist pc mem in out f)
@@ -139,6 +139,7 @@
 ;;; branch if positive (8xx) 
 (defun branch-positive-op (acc ist pc mem in out f)
   (let ((cell (mod ist 100)))
+    (print pc)
     (if (equal f noflag) (new-state acc cell mem in out f)
        (new-state acc (sum-pc pc) mem in out f))))
     
@@ -163,9 +164,10 @@
   (cond ((null (state-p s)) nil)
         (T (exe-out s (state-MEM s)))))
 
-;;; controlla se è halted-state o è arrivata alla fine della memoria
+;;; controlla se Ã¨ halted-state o Ã¨ arrivata alla fine della memoria
 (defun exe-out (s l)
   (let ((newstate (one-instruction s)))
+    (print newstate)
     (cond ((halted-state-p newstate) (halted-state-OUT newstate))
           ((null (cdr l)) nil)
           (T (exe-out newstate (cdr l))))))
@@ -295,7 +297,7 @@
                (controlla-etichette-doppie (rest l))))
       T)))
 
-;; torna T se c'è una doppia
+;; torna T se c'Ã¨ una doppia
 (defun is-etichetta-doppia (etichetta l)
   (let ((riga (first l)))
     (if (not (null riga))

@@ -21,4 +21,4 @@ END     lda    RESULT
 ONE     dat 1 // value "1"
 FIRST   dat // first number location
 SECOND  dat // second number location
-end  dat 0 // location of the result (initially zero)
+RESULT  dat 0 // location of the result (initially zero)
