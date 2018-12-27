@@ -37,16 +37,24 @@
 (defparameter noflag (quote noflag))
 
 ;;; definizione di state e halted-state
-(defstruct (state (:type list) :named) A ACC P PC M MEM I IN O OUT F FLAG)
-(defstruct (halted-state (:type list) :named)  A ACC P PC M MEM I IN O OUT
+(defstruct (state (:type list) :named) 
+  A ACC P PC 
+  M (MEM (:type list)) 
+  I (IN (:type list))
+  O (OUT (:type list)) 
   F FLAG)
+
+(defstruct (halted-state (:type list) :named) 
+  A ACC P PC 
+  M (MEM (:type list)) 
+  I (IN (:type list))
+  O (OUT (:type list)) 
+  F FLAG)
+
 
 (defun new-state (acc pc mem in out f)
   (if (and (mod-100 pc)
            (or (equal flag f) (equal noflag f))
-           (listp mem)
-           (listp in)
-           (listp out)
            (is-lista-1000 mem)
            (is-lista-1000 in)
            (is-lista-1000 out))
@@ -56,9 +64,6 @@
 (defun new-halted-state (acc pc mem in out f)
   (if (and (mod-100 pc)
            (or (equal flag f) (equal noflag f))
-           (listp mem)
-           (listp in)
-           (listp out)
            (is-lista-1000 mem)
            (is-lista-1000 in)
            (is-lista-1000 out))

@@ -51,7 +51,7 @@
            (is-lista-1000 in)
            (is-lista-1000 out))
       (make-state :A :ACC :ACC acc :P :PC :PC pc :M :MEM :MEM mem
-		  :I:IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
+		  :I :IN :IN in :O :OUT :OUT out :F :FLAG :FLAG f)))
 
 (defun new-halted-state (acc pc mem in out f)
   (if (and (mod-100 pc)
@@ -204,7 +204,8 @@
     (let ((etichette (lista-etichette lista 0)))
       (cond ((null (controlla-etichette-doppie etichette)) nil)
             (T (let ((mem (genera-memoria lista etichette)))
-                 (cond ((< (length mem) 100) (aggiungi-zeri mem))
+                 (cond ((> (length mem) 100) nil)
+                       ((< (length mem) 100) (aggiungi-zeri mem))
                        (T mem))))))))
 
 ;;; torna la posizione del primo slash, se la stringa contiene un commento
@@ -284,7 +285,7 @@
 (defun lista-etichette-riga (l cont)
   (unless (null (first l))
     (cond ((not (null (is-etichetta (first l))))
-          (list (is-etichetta (first l)) cont)))))
+             (list (is-etichetta (first l)) cont)))))
 
 ;; torna T se non ci sono doppie
 (defun controlla-etichette-doppie (l)
@@ -355,7 +356,8 @@
 
 (defun lmc-run (file input)
   (let ((mem (lmc-load file)))
-    (execution-loop (new-state 0 0 mem input '() noflag))))
+    (cond ((null mem) nil)
+          (T (execution-loop (new-state 0 0 mem input '() noflag))))))
  
 
 
