@@ -18,7 +18,7 @@
 ;;; controlla che x sia compreso tra 0 e 999
 (defun mod-1000 (x)
   (if (and (> x -1) (< x 1000)) T
-    nil))
+    (mod x 1000)))
 
 ;;; incrementa pc di 1. Se è 99 allora il prox numero è 0
 (defun sum-pc (x)
@@ -32,7 +32,6 @@
         ((null (mod-1000 (first l))) nil)
         (T (is-lista-1000 (rest l)))))
 
-;;; definizione di flag e noflag
 (defparameter flag (quote flag))
 (defparameter noflag (quote noflag))
 
@@ -103,17 +102,17 @@
 (defun add-op (acc ist pc mem in out) 
   (let ((elemento (nth (mod ist 100) mem)))
     (cond ((null elemento) nil)
-          ((null (mod-1000 (+ elemento acc)))
-	   (new-state (+ elemento acc)(sum-pc pc) mem in out flag))
-          (T (new-state (+ elemento acc) (sum-pc pc) mem in out noflag)))))
+          ((not (numberp (mod-1000 (+ elemento acc))))
+	   (new-state (+ elemento acc)(sum-pc pc) mem in out noflag))
+          (T (new-state (mod-1000 (+ elemento acc)) (sum-pc pc) mem in out flag)))))
 
 ;;; sottazione (2xx)
 (defun sub-op (acc ist pc mem in out) 
   (let ((elemento (nth (mod ist 100) mem)))
     (cond ((null elemento) nil)
-          ((null (mod-1000 (- acc elemento)))
-	   (new-state (- acc elemento) (sum-pc pc) mem in out flag))
-          (T (new-state (- acc elemento) (sum-pc pc) mem in out noflag)))))
+          ((not (numberp (mod-1000 (- acc elemento))))
+	   (new-state (- acc elemento) (sum-pc pc) mem in out noflag))
+          (T (new-state (mod-1000 (- acc elemento)) (sum-pc pc) mem in out flag)))))
 
 ;;; store (3xx)
 (defun store-op (acc ist pc mem in out f)
@@ -172,8 +171,7 @@
 (defun exe-out (s l)
   (let ((newstate (one-instruction s)))
     (cond ((halted-state-p newstate) (halted-state-OUT newstate))
-          ((null (cdr l)) nil)
-          (T (exe-out newstate (cdr l))))))
+          (T (exe-out newstate l)))))
   
 ;;; aggiunge alla memoria 0 fino ad arrivare a 100 elementi
 (defun aggiungi-zeri (l)
